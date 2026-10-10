@@ -1,0 +1,33 @@
+@* Shared form fields for adding and editing an environment. *@
+@model AppRegistry.Web.Models.AppEnvironment
+
+<div class="row g-3 mb-3">
+    <div class="col-md-4">
+        <label asp-for="Type" class="form-label">Type <span class="text-danger">*</span></label>
+        <select asp-for="Type" asp-items="Html.GetEnumSelectList<EnvironmentType>()" class="form-select"></select>
+        <span asp-validation-for="Type" class="text-danger small"></span>
+    </div>
+    <div class="col-md-8">
+        <label asp-for="Label" class="form-label"></label>
+        <input asp-for="Label" class="form-control" placeholder="e.g. Prod – East, UAT 2" />
+        <div class="form-text">Optional. Use it when a system has more than one environment of the same type.</div>
+        <span asp-validation-for="Label" class="text-danger small"></span>
+    </div>
+</div>
+<div class="mb-3">
+    <label asp-for="Url" class="form-label">URL <span class="text-danger">*</span></label>
+    <input asp-for="Url" type="url" class="form-control" placeholder="https://" />
+    <div class="form-text">The link users click to open the application.</div>
+    <span asp-validation-for="Url" class="text-danger small"></span>
+</div>
+<div class="mb-3">
+    <label asp-for="DeploymentLocation" class="form-label">Deployment Location <span class="text-danger">*</span></label>
+    <input asp-for="DeploymentLocation" class="form-control" placeholder="e.g. Azure – East US 2 – rg-payroll-prod, or On-prem – SRV-APP-04" />
+    <div class="form-text">Where it actually runs: Azure region, resource group, server name, etc.</div>
+    <span asp-validation-for="DeploymentLocation" class="text-danger small"></span>
+</div>
+<div class="mb-3">
+    <label asp-for="Notes" class="form-label"></label>
+    <textarea asp-for="Notes" class="form-control" rows="2"></textarea>
+    <span asp-validation-for="Notes" class="text-danger small"></span>
+</div>
