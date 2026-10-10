@@ -9,7 +9,7 @@
     <a asp-page="Create" class="btn btn-primary">+ New System</a>
 </div>
 
-@if (Model.Systems.Count == 0)
+@if (Model.TotalCount == 0)
 {
     <div class="alert bg-body-tertiary border text-center py-5">
         <p class="mb-2">No systems yet.</p>
@@ -18,32 +18,87 @@
 }
 else
 {
-    <div class="table-responsive">
-        <table class="table table-hover align-middle">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Business Owner</th>
-                    <th>System Admin</th>
-                    <th>IT Developer</th>
-                    <th class="text-end">Environments</th>
-                    <th>Last Updated</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var s in Model.Systems)
+    @* method="get" puts the search in the URL (/Systems?q=...&type=...), so results can be bookmarked or shared. *@
+    <form method="get" class="row g-2 align-items-end mb-3" role="search">
+        <div class="col-md-6">
+            <label for="q" class="form-label small text-body-secondary mb-1">Search</label>
+            <input id="q" name="q" value="@Model.Q" class="form-control" type="search"
+                   placeholder="System, person, URL or server name" />
+        </div>
+        <div class="col-md-3">
+            <label for="type" class="form-label small text-body-secondary mb-1">Has environment</label>
+            <select id="type" name="type" class="form-select">
+                <option value="">Any type</option>
+                @foreach (var t in Enum.GetValues<EnvironmentType>())
                 {
-                    <tr>
-                        <td><a asp-page="Details" asp-route-id="@s.Id" class="fw-semibold">@s.Name</a></td>
-                        <td>@s.BusinessOwner</td>
-                        <td>@s.SystemAdmin</td>
-                        <td>@s.ItDeveloper</td>
-                        <td class="text-end">@s.Environments.Count</td>
-                        <td class="text-muted small">@s.UpdatedAt.ToLocalTime().ToString("MMM d, yyyy")</td>
-                    </tr>
+                    <option value="@t" selected="@(Model.Type == t)">@t</option>
                 }
-            </tbody>
-        </table>
-    </div>
-    <p class="text-muted small">@Model.Systems.Count system(s)</p>
+            </select>
+        </div>
+        <div class="col-md-3 d-flex gap-2">
+            <button type="submit" class="btn btn-outline-primary">Search</button>
+            @if (Model.IsFiltered)
+            {
+                <a asp-page="Index" class="btn btn-link">Clear</a>
+            }
+        </div>
+    </form>
+
+    @if (Model.Systems.Count == 0)
+    {
+        <div class="alert bg-body-tertiary border text-center py-4">
+            No systems match your search. <a asp-page="Index">Show all systems</a>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Business Owner</th>
+                        <th>System Admin</th>
+                        <th>IT Developer</th>
+                        <th>Environments</th>
+                        <th>Last Updated</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var s in Model.Systems)
+                    {
+                        <tr>
+                            <td><a asp-page="Details" asp-route-id="@s.Id" class="fw-semibold">@s.Name</a></td>
+                            <td>@s.BusinessOwner</td>
+                            <td>@s.SystemAdmin</td>
+                            <td>@s.ItDeveloper</td>
+                            <td>
+                                @* One badge per environment type, with a count when there's more than one. Production first. *@
+                                @foreach (var g in s.Environments.GroupBy(e => e.Type).OrderByDescending(g => g.Key))
+                                {
+                                    <span class="badge @g.Key.BadgeClass() me-1">@g.Key@(g.Count() > 1 ? $" ×{g.Count()}" : "")</span>
+                                }
+                                @if (s.Environments.Count == 0)
+                                {
+                                    <span class="text-body-secondary small">None yet</span>
+                                }
+                            </td>
+                            <td class="text-body-secondary small text-nowrap">@s.UpdatedAt.ToLocalTime().ToString("MMM d, yyyy")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    <p class="text-body-secondary small">
+        @if (Model.IsFiltered)
+        {
+            @:Showing @Model.Systems.Count of @Model.TotalCount system(s)
+        }
+        else
+        {
+            @:@Model.TotalCount system(s)
+        }
+    </p>
 }
