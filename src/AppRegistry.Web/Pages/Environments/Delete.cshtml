@@ -1,0 +1,23 @@
+@page "{id:int}"
+@model AppRegistry.Web.Pages.Environments.DeleteModel
+@{
+    var env = Model.AppEnvironment;
+    var system = env.AppSystem!;
+    ViewData["Title"] = $"Delete Environment – {system.Name}";
+}
+
+<nav class="small mb-2"><a asp-page="/Systems/Details" asp-route-id="@system.Id">← @system.Name</a></nav>
+<h1 class="h3 mb-3">Delete Environment</h1>
+
+<div class="alert alert-danger col-lg-8">
+    <p class="mb-1">
+        Delete the <strong>@env.Type@(string.IsNullOrWhiteSpace(env.Label) ? "" : $" ({env.Label})")</strong>
+        environment of <strong>@system.Name</strong>?
+    </p>
+    <p class="mb-0 small text-break">@env.Url · @env.DeploymentLocation</p>
+</div>
+
+<form method="post">
+    <button type="submit" class="btn btn-danger">Delete Environment</button>
+    <a asp-page="/Systems/Details" asp-route-id="@system.Id" class="btn btn-link">Cancel</a>
+</form>
