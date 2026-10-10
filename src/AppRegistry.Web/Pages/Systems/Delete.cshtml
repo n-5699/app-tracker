@@ -1,0 +1,21 @@
+@page "{id:int}"
+@model AppRegistry.Web.Pages.Systems.DeleteModel
+@{
+    var s = Model.AppSystem;
+    ViewData["Title"] = $"Delete {s.Name}";
+}
+
+<nav class="small mb-2"><a asp-page="Details" asp-route-id="@s.Id">← Back to system</a></nav>
+<h1 class="h3 mb-3">Delete System</h1>
+
+<div class="alert alert-danger col-lg-8">
+    <p class="mb-1">Delete <strong>@s.Name</strong>?</p>
+    <p class="mb-0 small">
+        This also deletes its @s.Environments.Count environment(s). This cannot be undone.
+    </p>
+</div>
+
+<form method="post">
+    <button type="submit" class="btn btn-danger">Delete System</button>
+    <a asp-page="Details" asp-route-id="@s.Id" class="btn btn-link">Cancel</a>
+</form>
