@@ -1,0 +1,12 @@
+@page "/status/{code:int}"
+@model StatusCodeModel
+@{
+    ViewData["Title"] = Model.Heading;
+}
+
+<div class="py-5 text-center">
+    <p class="display-6 text-body-secondary mb-1">@Model.Code</p>
+    <h1 class="h3 mb-3">@Model.Heading</h1>
+    <p class="text-body-secondary mb-4">@Model.Explanation</p>
+    <a asp-page="/Systems/Index" class="btn btn-primary">Back to Systems</a>
+</div>

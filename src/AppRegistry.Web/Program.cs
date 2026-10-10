@@ -41,6 +41,9 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+// Show a friendly page (instead of a blank browser error) for 404 Not Found and similar responses.
+app.UseStatusCodePagesWithReExecute("/status/{0}");
+
 app.UseHttpsRedirection();
 
 app.UseRouting();
