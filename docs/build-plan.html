@@ -1,0 +1,295 @@
+<title>App Registry Build Plan</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: single reading column; overview flow chart on top, then one stacked block per build part */
+:root {
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --fg: #1b2230;
+  --muted: #5a6577;
+  --line: #dde2ea;
+  --accent: #0f5fa8;
+  --accent-soft: #e6f0fa;
+  --done: #1e7d4f;
+  --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11151c; --surface: #19202a; --fg: #e4e8ef; --muted: #9aa5b6;
+    --line: #2b3442; --accent: #6cb2f0; --accent-soft: #1a2a3c; --done: #5cc98f;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11151c; --surface: #19202a; --fg: #e4e8ef; --muted: #9aa5b6;
+  --line: #2b3442; --accent: #6cb2f0; --accent-soft: #1a2a3c; --done: #5cc98f;
+  color-scheme: dark;
+}
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.6; padding: 0 16px; }
+.wrap { max-width: 860px; margin: 0 auto; padding-block: 40px 64px; display: flex; flex-direction: column; gap: 40px; }
+header { display: flex; flex-direction: column; gap: 8px; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+h1 { font-size: 32px; line-height: 1.2; margin: 0; text-wrap: balance; }
+h2 { font-size: 20px; margin: 0; text-wrap: balance; }
+h3 { font-size: 17px; margin: 0; }
+p { margin: 0; max-width: 65ch; }
+.lede { color: var(--muted); font-size: 16px; }
+.stack { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.chip { font-family: var(--font-mono); font-size: 12px; padding: 3px 10px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); background: var(--surface); }
+section { display: flex; flex-direction: column; gap: 16px; }
+.chart { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 20px; overflow-x: auto; }
+.chart pre.mermaid { margin: 0; display: flex; justify-content: center; }
+.parts { display: flex; flex-direction: column; gap: 0; border-left: 2px solid var(--line); margin-left: 15px; }
+.part { position: relative; padding: 0 0 32px 32px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.part:last-child { padding-bottom: 0; }
+.num { position: absolute; left: -17px; top: -2px; width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: var(--bg); font-family: var(--font-mono); font-weight: 500; display: grid; place-items: center; font-size: 14px; }
+.part .goal { color: var(--muted); }
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 640px) { .cols { grid-template-columns: 1fr; } }
+.box { min-width: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; }
+.label { font-family: var(--font-mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 3px; }
+code { font-family: var(--font-mono); font-size: 13px; background: var(--accent-soft); color: var(--fg); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+.done { border-left: 3px solid var(--done); background: var(--surface); border-radius: 0 8px 8px 0; padding: 10px 14px; }
+.done .label { color: var(--done); }
+.doc { font-family: var(--font-mono); font-size: 12px; color: var(--accent); }
+footer { color: var(--muted); font-size: 13px; border-top: 1px solid var(--line); padding-top: 16px; }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Build plan · 7 parts</div>
+    <h1>App Registry: build plan</h1>
+    <p class="lede">An internal web app where agency staff record every system they maintain: who owns it, who administers it, who develops it, and every environment it runs in. Build it one part at a time, check that part works, then move to the next.</p>
+    <div class="stack">
+      <span class="chip">C# / .NET 10</span>
+      <span class="chip">ASP.NET Core Razor Pages</span>
+      <span class="chip">Entity Framework Core</span>
+      <span class="chip">Azure SQL</span>
+      <span class="chip">Azure App Service</span>
+    </div>
+  </header>
+
+  <section>
+    <h2>The whole process</h2>
+    <div class="chart">
+<pre class="mermaid">
+flowchart TD
+    P1["1 · Project setup<br/>.NET 10 + empty Razor Pages app"] --> P2["2 · Data model + database<br/>Models, DbContext, first migration"]
+    P2 --> P3["3 · Systems pages<br/>List, Create, Details, Edit, Delete"]
+    P3 --> P4["4 · Environments pages<br/>Add / edit / delete per system"]
+    P4 --> P5["5 · List, search, filter<br/>Find systems quickly"]
+    P5 --> P6["6 · UI polish + validation<br/>Clean forms, clear errors"]
+    P6 --> P7["7 · Deploy to Azure<br/>App Service + Azure SQL"]
+    P7 --> L(["Live: coworkers enter data"])
+</pre>
+    </div>
+  </section>
+
+  <section>
+    <h2>How the finished app fits together</h2>
+    <div class="chart">
+<pre class="mermaid">
+flowchart LR
+    U["Coworker's browser"] --> P["Razor Pages<br/>(Parts 3–6)"]
+    P --> EF["EF Core · AppDbContext<br/>(Part 2)"]
+    EF --> SQL[("Azure SQL<br/>Systems · Environments")]
+    subgraph Azure ["Azure (Part 7)"]
+      AS["App Service"] --- SQL
+    end
+</pre>
+    </div>
+  </section>
+
+  <section>
+    <h2>Each part in detail</h2>
+    <div class="parts">
+
+      <div class="part">
+        <div class="num">1</div>
+        <h3>Project setup</h3>
+        <p class="goal">Get the tools installed and a blank ASP.NET Core site running on your machine.</p>
+        <div class="cols">
+          <div class="box"><span class="label">Tasks</span>
+            <ul>
+              <li>Install the .NET 10 SDK and VS Code with C# Dev Kit</li>
+              <li>Install the EF tools: <code>dotnet tool install -g dotnet-ef</code></li>
+              <li>Create the solution and the <code>AppRegistry.Web</code> Razor Pages project</li>
+              <li><code>git init</code>, add a .gitignore, first commit</li>
+            </ul>
+          </div>
+          <div class="box"><span class="label">Files</span>
+            <ul>
+              <li><code>AppRegistry.sln</code></li>
+              <li><code>src/AppRegistry.Web/Program.cs</code></li>
+              <li><code>Pages/Index.cshtml</code></li>
+            </ul>
+          </div>
+        </div>
+        <div class="done"><span class="label">Done when</span><p><code>dotnet run</code> opens the default welcome page in the browser.</p></div>
+        <span class="doc">docs/01-project-setup.md</span>
+      </div>
+
+      <div class="part">
+        <div class="num">2</div>
+        <h3>Data model + database</h3>
+        <p class="goal">Describe Systems and Environments as C# classes and create the matching SQL tables.</p>
+        <div class="cols">
+          <div class="box"><span class="label">Tasks</span>
+            <ul>
+              <li>Write <code>AppSystem</code>: Name, Description, BusinessOwner, SystemAdmin, ItDeveloper</li>
+              <li>Write <code>AppEnvironment</code>: Type, Label, Url, DeploymentLocation, Notes</li>
+              <li>One system has many environments (cascade delete)</li>
+              <li>Set up a SQL Server database (Docker locally, or a dev Azure SQL DB from Dad)</li>
+              <li>Store the connection string with <code>dotnet user-secrets</code></li>
+              <li><code>dotnet ef migrations add Initial</code> → <code>database update</code></li>
+            </ul>
+          </div>
+          <div class="box"><span class="label">Files</span>
+            <ul>
+              <li><code>Models/AppSystem.cs</code></li>
+              <li><code>Models/AppEnvironment.cs</code></li>
+              <li><code>Models/EnvironmentType.cs</code></li>
+              <li><code>Data/AppDbContext.cs</code></li>
+              <li><code>Migrations/…</code></li>
+            </ul>
+          </div>
+        </div>
+        <div class="done"><span class="label">Done when</span><p>The <code>Systems</code> and <code>Environments</code> tables show up in SSMS or the VS Code MSSQL extension.</p></div>
+        <span class="doc">docs/02-data-model-and-database.md</span>
+      </div>
+
+      <div class="part">
+        <div class="num">3</div>
+        <h3>Systems pages</h3>
+        <p class="goal">Pages to create, view, edit and delete a system.</p>
+        <div class="cols">
+          <div class="box"><span class="label">Tasks</span>
+            <ul>
+              <li>Index page: table of all systems</li>
+              <li>Create and Edit forms for the five system fields</li>
+              <li>Details page that shows everything about one system</li>
+              <li>Delete page with a confirm step</li>
+            </ul>
+          </div>
+          <div class="box"><span class="label">Files</span>
+            <ul>
+              <li><code>Pages/Systems/Index.cshtml</code></li>
+              <li><code>Pages/Systems/Create.cshtml</code></li>
+              <li><code>Pages/Systems/Details.cshtml</code></li>
+              <li><code>Pages/Systems/Edit.cshtml</code></li>
+              <li><code>Pages/Systems/Delete.cshtml</code></li>
+            </ul>
+          </div>
+        </div>
+        <div class="done"><span class="label">Done when</span><p>You can add a system, see it in the list, edit it and delete it, and each change shows up in the database.</p></div>
+        <span class="doc">docs/03-systems-pages.md</span>
+      </div>
+
+      <div class="part">
+        <div class="num">4</div>
+        <h3>Environments pages</h3>
+        <p class="goal">Add the places each system is deployed, attached to that system.</p>
+        <div class="cols">
+          <div class="box"><span class="label">Tasks</span>
+            <ul>
+              <li>"Add Environment" button on the system Details page</li>
+              <li>Form: Type (Dev/Test/UAT/Staging/Production), Label, URL, Deployment Location, Notes</li>
+              <li>Allow several environments of the same type</li>
+              <li>Show environments grouped by type; URLs open in a new tab</li>
+              <li>Edit and Delete for each environment</li>
+            </ul>
+          </div>
+          <div class="box"><span class="label">Files</span>
+            <ul>
+              <li><code>Pages/Environments/Create.cshtml</code></li>
+              <li><code>Pages/Environments/Edit.cshtml</code></li>
+              <li><code>Pages/Environments/Delete.cshtml</code></li>
+              <li><code>Pages/Systems/Details.cshtml</code> (updated)</li>
+            </ul>
+          </div>
+        </div>
+        <div class="done"><span class="label">Done when</span><p>A system shows 2 Production environments and 1 UAT, and each URL opens the right site.</p></div>
+        <span class="doc">docs/04-environments-pages.md</span>
+      </div>
+
+      <div class="part">
+        <div class="num">5</div>
+        <h3>List, search, filter</h3>
+        <p class="goal">Make it quick to find a system once the list gets long.</p>
+        <div class="cols">
+          <div class="box"><span class="label">Tasks</span>
+            <ul>
+              <li>Home page sends you to the Systems list</li>
+              <li>Search box: system name or business owner</li>
+              <li>Filter: only systems that have a given environment type</li>
+              <li>Show environment count per system in the list</li>
+            </ul>
+          </div>
+          <div class="box"><span class="label">Files</span>
+            <ul>
+              <li><code>Pages/Systems/Index.cshtml(.cs)</code> (updated)</li>
+              <li><code>Pages/Index.cshtml.cs</code></li>
+            </ul>
+          </div>
+        </div>
+        <div class="done"><span class="label">Done when</span><p>Searching "payroll" or filtering by "UAT" shows only the matching systems.</p></div>
+        <span class="doc">docs/05-list-and-search.md</span>
+      </div>
+
+      <div class="part">
+        <div class="num">6</div>
+        <h3>UI polish + validation</h3>
+        <p class="goal">Make data entry clean and hard to get wrong, since many coworkers will use it.</p>
+        <div class="cols">
+          <div class="box"><span class="label">Tasks</span>
+            <ul>
+              <li>Required fields, max lengths, valid-URL check</li>
+              <li>Block duplicate system names with a clear message</li>
+              <li>Auto-set CreatedAt / UpdatedAt</li>
+              <li>Clean Bootstrap layout, nav bar, empty-list messages</li>
+            </ul>
+          </div>
+          <div class="box"><span class="label">Files</span>
+            <ul>
+              <li><code>Models/*.cs</code> (validation attributes)</li>
+              <li><code>Pages/Shared/_Layout.cshtml</code></li>
+              <li><code>wwwroot/css/site.css</code></li>
+            </ul>
+          </div>
+        </div>
+        <div class="done"><span class="label">Done when</span><p>Saving a bad URL or a blank required field shows a clear error and saves nothing.</p></div>
+        <span class="doc">docs/06-ui-and-validation.md</span>
+      </div>
+
+      <div class="part">
+        <div class="num">7</div>
+        <h3>Deploy to Azure</h3>
+        <p class="goal">Put the app online for the team, backed by Azure SQL.</p>
+        <div class="cols">
+          <div class="box"><span class="label">Tasks</span>
+            <ul>
+              <li>Create a resource group, an Azure SQL server and a database (Dad can help)</li>
+              <li>Create an App Service web app on .NET 10</li>
+              <li>Add the connection string in App Service settings</li>
+              <li>Run the migrations against Azure SQL</li>
+              <li>Publish from VS Code, Visual Studio, <code>az webapp deploy</code>, or GitHub Actions</li>
+            </ul>
+          </div>
+          <div class="box"><span class="label">Files</span>
+            <ul>
+              <li><code>.github/workflows/deploy.yml</code> (optional)</li>
+              <li><code>appsettings.json</code> (no secrets)</li>
+            </ul>
+          </div>
+        </div>
+        <div class="done"><span class="label">Done when</span><p>The App Service URL works and a system entered there shows up in Azure SQL.</p></div>
+        <span class="doc">docs/07-deploy-to-azure.md</span>
+      </div>
+
+    </div>
+  </section>
+
+  <footer>Each part has an instruction file in the <code>docs/</code> folder of the project: Goal → Prerequisites → Steps → How to verify → What you learned.</footer>
+</div>
