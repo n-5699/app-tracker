@@ -33,9 +33,20 @@ Each application the agency maintains is a **system**.
 |---|---|---|
 | **Name** | Yes | The system's name. Must be unique. |
 | **Description** | No | What the system does and who uses it. |
-| **Business Owner** | Yes | The product owner, the person who sets the requirements. |
-| **System Admin** | No | The person who administers the system day to day. |
-| **IT Developer** | No | The developer who maintains the system. |
+| **Business Owner** | Yes | The product owner, the person who sets the requirements. Picked from Members. |
+| **System Admin** | No | The person who administers the system day to day. Picked from Members. |
+| **IT Developer** | No | The developer who maintains the system. Picked from Members. |
+
+### Members
+The people who can be assigned to systems. Each member has one role, and only members with that role appear in that role's dropdown on a system.
+
+| Field | Required | Meaning |
+|---|---|---|
+| **Role** | Yes | `Business Owner`, `System Admin`, or `IT Developer`. |
+| **Full Name** | Yes | e.g. "Jane Smith". |
+| **Work Email** | Yes | Must be unique. Stored in lower case. |
+| **Work Phone** | Yes | e.g. "(860) 555-0123". |
+| **Active** | — | Inactive members stay on their current systems but can't be picked for new ones. |
 
 ### Environments
 Each system can be deployed to one or more **environments**. A system can have **more than one environment of the same type** (for example, two Production instances in different regions).
@@ -57,8 +68,12 @@ No login is required. Anyone on the team with the link can view and enter data.
 ```mermaid
 flowchart TD
     A[Open App Registry] --> B[Systems list]
+    A --> M[Members list]
+    M -->|"+ Add Member"| MC[Role, full name,<br/>work email, work phone]
+    MC --> M
+    M -->|Click a member| MD[Member page<br/>contact info + their systems]
     B -->|Search / filter| B
-    B -->|"+ New System"| C[Enter system details]
+    B -->|"+ New System"| C[Enter system details<br/>pick people from Members dropdowns]
     C -->|Save| E[System details page]
     B -->|Click a system| E
     E -->|Edit / Delete| C
@@ -69,10 +84,12 @@ flowchart TD
 
 **Typical tasks**
 
-1. **Add a new system:** Systems → **New System** → fill in the name, description and the three people → **Save**.
-2. **Record where it is deployed:** open the system → **Add Environment** → choose the type, paste the URL, enter the deployment location → **Save**. Repeat for each environment.
-3. **Find an application:** search by system name or owner, or filter by environment type.
-4. **Open an application:** click any environment URL on a system's page.
+1. **Add the people first:** Members → **Add Member** → choose the role, enter full name, work email and work phone.
+2. **Add a new system:** Systems → **New System** → fill in the name and description, pick the Business Owner, System Admin and IT Developer from the dropdowns → **Save**.
+3. **Record where it is deployed:** open the system → **Add Environment** → choose the type, paste the URL, enter the deployment location → **Save**. Repeat for each environment.
+4. **Find an application:** search by system name, a person's name or email, a URL or a server name, or filter by environment type.
+5. **See someone's systems:** Members → click a person.
+6. **Open an application:** click any environment URL on a system's page.
 
 ---
 
@@ -84,7 +101,7 @@ flowchart TD
 | Web framework | **ASP.NET Core Razor Pages** |
 | UI styling | Bootstrap (ships with the ASP.NET Core template) |
 | Data access | **Entity Framework Core** (code-first, migrations) |
-| Database | **Azure SQL Database** (SQL Server for local development) |
+| Database | **Azure SQL Database** in production; a local **SQLite** file for the demo |
 | Hosting | **Azure App Service** |
 | Secrets / config | App Service configuration settings; .NET User Secrets locally |
 | Source control & CI/CD | GitHub or **Azure DevOps**, with GitHub Actions or Azure Pipelines |
@@ -120,18 +137,31 @@ flowchart LR
 
 ## Database
 
-Two tables with a one-to-many relationship: one system has many environments.
+Three tables. One system has many environments, and each system links to up to three members (one per role).
 
 ```mermaid
 erDiagram
     Systems ||--o{ Environments : "deployed to"
+    Members ||--o{ Systems : "Business Owner of"
+    Members |o--o{ Systems : "System Admin of"
+    Members |o--o{ Systems : "IT Developer of"
+    Members {
+        int Id PK
+        nvarchar Role "BusinessOwner/SystemAdmin/ItDeveloper"
+        nvarchar FullName
+        nvarchar WorkEmail "unique"
+        nvarchar WorkPhone
+        bit IsActive
+        datetime2 CreatedAt
+        datetime2 UpdatedAt
+    }
     Systems {
         int Id PK
         nvarchar Name "unique"
         nvarchar Description
-        nvarchar BusinessOwner
-        nvarchar SystemAdmin
-        nvarchar ItDeveloper
+        int BusinessOwnerId FK
+        int SystemAdminId FK
+        int ItDeveloperId FK
         datetime2 CreatedAt
         datetime2 UpdatedAt
     }
@@ -147,6 +177,7 @@ erDiagram
 ```
 
 - Deleting a system **also deletes its environments** (cascade delete).
+- A member **can't be deleted while assigned** to a system (restrict). Deactivate them instead.
 - The schema is owned by **EF Core migrations** in the code. Change it by adding a migration, not by editing tables by hand, so the code and database never drift apart.
 
 ---
@@ -157,16 +188,18 @@ Several coworkers will be entering data into the same SQL database, so consisten
 
 - **Use the web app to enter and edit data.** It checks required fields and URL formats, and it keeps timestamps up to date. Direct SQL inserts skip those checks.
 - **Check before you create.** Search for the system first so you don't create a duplicate. Names must be unique.
-- **Use full names for people** (e.g. "Jane Smith", not "Jane" or "JS").
+- **Add people once, in Members**, with their full name (e.g. "Jane Smith", not "Jane" or "JS") and work email. Every system then links to the same person record.
+- **Deactivate, don't delete,** people who leave. Their systems keep the history, and they disappear from the dropdowns.
 - **Paste the full URL**, including `https://`.
 - **Be specific about location**, e.g. `Azure – East US 2 – rg-payroll-prod` or `On-prem – SRV-APP-04`.
 - **Use Label** whenever a system has more than one environment of the same type.
 - **Read-only SQL access is fine.** For reports, query the database with SSMS or VS Code (see example below). For bulk changes, talk to the app maintainer first.
 
 ```sql
--- Every production URL, by system
-SELECT s.Name, s.BusinessOwner, e.Label, e.Url, e.DeploymentLocation
+-- Every production URL, by system, with its business owner
+SELECT s.Name, bo.FullName AS BusinessOwner, bo.WorkEmail, e.Label, e.Url, e.DeploymentLocation
 FROM Systems s
+JOIN Members bo ON bo.Id = s.BusinessOwnerId
 JOIN Environments e ON e.AppSystemId = s.Id
 WHERE e.Type = 'Production'
 ORDER BY s.Name;
@@ -188,13 +221,17 @@ app-registry/
         ├── Models/
         │   ├── AppSystem.cs
         │   ├── AppEnvironment.cs
-        │   └── EnvironmentType.cs
+        │   ├── EnvironmentType.cs
+        │   ├── Member.cs
+        │   └── MemberRole.cs
         ├── Data/
-        │   └── AppDbContext.cs
+        │   ├── AppDbContext.cs
+        │   └── MemberQueries.cs  ← dropdown choices, assignment checks
         ├── Migrations/           ← generated by EF Core
         ├── Pages/
         │   ├── Systems/          ← Index, Create, Details, Edit, Delete
-        │   └── Environments/     ← Create, Edit, Delete
+        │   ├── Environments/     ← Create, Edit, Delete
+        │   └── Members/          ← Index, Create, Details, Edit, Delete
         └── wwwroot/              ← CSS, JS, Bootstrap
 ```
 
@@ -205,36 +242,35 @@ app-registry/
 ### Prerequisites
 - [.NET 10 SDK](https://dotnet.microsoft.com/download)
 - EF Core tools: `dotnet tool install --global dotnet-ef`
-- A SQL Server database: either a dev **Azure SQL** database, or **SQL Server running in Docker** for local work
 - Visual Studio or VS Code with C# Dev Kit
 
-### Run locally
+### Run locally (demo database, nothing else to install)
 
 ```bash
-# 1. Clone and enter the project
 git clone <repo-url> app-registry
 cd app-registry/src/AppRegistry.Web
-
-# 2. Store the connection string securely (never commit it)
-dotnet user-secrets set "ConnectionStrings:AppRegistry" "Server=...;Database=AppRegistry;User Id=...;Password=...;Encrypt=True;"
-
-# 3. Create or update the database schema
-dotnet ef database update
-
-# 4. Run the app
 dotnet run
 ```
 
-Then open the URL shown in the terminal (e.g. `https://localhost:5001`).
+Open `http://localhost:5253`. In Development the app uses a local **SQLite** file, `appregistry.db`, which is created automatically on first run and never committed.
+
+### Run locally against SQL Server / Azure SQL
+
+```bash
+# Store the connection string securely (never commit it)
+dotnet user-secrets set "DatabaseProvider" "SqlServer"
+dotnet user-secrets set "ConnectionStrings:AppRegistry" "Server=...;Database=AppRegistry;User Id=...;Password=...;Encrypt=True;"
+dotnet run   # applies migrations automatically on startup
+```
 
 ### Changing the database schema
 
 ```bash
-dotnet ef migrations add <DescriptiveName>
-dotnet ef database update
+DatabaseProvider=SqlServer ConnectionStrings__AppRegistry="Server=design-time-only;Database=AppRegistry" \
+  dotnet ef migrations add <DescriptiveName>
 ```
 
-Commit the generated files in `Migrations/`.
+Commit the generated files in `Migrations/`. The app applies them to Azure SQL on its next start. For the local SQLite demo, delete `appregistry.db` so it's rebuilt.
 
 ---
 
@@ -243,15 +279,15 @@ Commit the generated files in `Migrations/`.
 | Resource | Purpose |
 |---|---|
 | **Resource Group** | Holds everything for App Registry |
-| **Azure SQL Server + Database** | Stores all systems and environments |
+| **Azure SQL Server + Database** | Stores all systems, environments and members |
 | **App Service Plan + Web App** | Hosts the ASP.NET Core application |
 
-**Steps (summary).** The full walkthrough is in `docs/07-deploy-to-azure.md`.
+**Steps (summary).** The full walkthrough is in `docs/08-deploy-to-azure.md`.
 
 1. Create the Azure SQL database and allow access from Azure services.
 2. Create the App Service web app (.NET 10 runtime).
 3. In the web app, go to **Settings → Environment variables → Connection strings** and add `AppRegistry` with the Azure SQL connection string.
-4. Apply migrations to Azure SQL (`dotnet ef database update` against the Azure connection string, or a migration bundle in the pipeline).
+4. The app applies its migrations to Azure SQL automatically on startup. To review the schema first, see [`docs/sql/create-schema.sql`](docs/sql/create-schema.sql).
 5. Publish the app from Visual Studio (**Publish → Azure**), with `az webapp deploy`, or through a GitHub Actions / Azure Pipelines workflow.
 6. Open the App Service URL and share it with the team.
 
@@ -268,7 +304,8 @@ flowchart TD
     P3 --> P4[4. Environments pages]
     P4 --> P5[5. List, search, filter]
     P5 --> P6[6. UI polish + validation]
-    P6 --> P7[7. Deploy to Azure]
+    P6 --> P7[7. Members]
+    P7 --> P8[8. Deploy to Azure]
 ```
 
 | # | Component | Instruction file | Status |
@@ -279,14 +316,14 @@ flowchart TD
 | 4 | Environments pages | [`docs/04-environments-pages.md`](docs/04-environments-pages.md) | ✅ |
 | 5 | List, search & filter | [`docs/05-list-and-search.md`](docs/05-list-and-search.md) | ✅ |
 | 6 | UI polish & validation | [`docs/06-ui-and-validation.md`](docs/06-ui-and-validation.md) | ✅ |
-| 7 | Deploy to Azure | [`docs/07-deploy-to-azure.md`](docs/07-deploy-to-azure.md) | ☐ |
+| 7 | Members | [`docs/07-members.md`](docs/07-members.md) | ✅ |
+| 8 | Deploy to Azure | [`docs/08-deploy-to-azure.md`](docs/08-deploy-to-azure.md) | ☐ |
 
 ---
 
 ## Future ideas
 
 - **Sign-in with Microsoft Entra ID** (work accounts) to record who changed what
-- **People directory** so owners/admins/developers are picked from a list instead of typed
 - **Change history / audit log** per system
 - **Export to Excel** or a **Power BI** report on top of the Azure SQL database
 - **Health checks** that ping each environment URL and show whether it's up

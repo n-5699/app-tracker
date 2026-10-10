@@ -59,7 +59,7 @@ footer { color: var(--muted); font-size: 13px; border-top: 1px solid var(--line)
 
 <div class="wrap">
   <header>
-    <div class="eyebrow">Build plan · 7 parts</div>
+    <div class="eyebrow">Build plan · 8 parts</div>
     <h1>App Registry: build plan</h1>
     <p class="lede">An internal web app where agency staff record every system they maintain: who owns it, who administers it, who develops it, and every environment it runs in. Build it one part at a time, check that part works, then move to the next.</p>
     <div class="stack">
@@ -81,8 +81,9 @@ flowchart TD
     P3 --> P4["4 · Environments pages<br/>Add / edit / delete per system"]
     P4 --> P5["5 · List, search, filter<br/>Find systems quickly"]
     P5 --> P6["6 · UI polish + validation<br/>Clean forms, clear errors"]
-    P6 --> P7["7 · Deploy to Azure<br/>App Service + Azure SQL"]
-    P7 --> L(["Live: coworkers enter data"])
+    P6 --> P7["7 · Members<br/>People picked from dropdowns by role"]
+    P7 --> P8["8 · Deploy to Azure<br/>App Service + Azure SQL"]
+    P8 --> L(["Live: coworkers enter data"])
 </pre>
     </div>
   </section>
@@ -92,10 +93,10 @@ flowchart TD
     <div class="chart">
 <pre class="mermaid">
 flowchart LR
-    U["Coworker's browser"] --> P["Razor Pages<br/>(Parts 3–6)"]
+    U["Coworker's browser"] --> P["Razor Pages<br/>(Parts 3–7)"]
     P --> EF["EF Core · AppDbContext<br/>(Part 2)"]
-    EF --> SQL[("Azure SQL<br/>Systems · Environments")]
-    subgraph Azure ["Azure (Part 7)"]
+    EF --> SQL[("Azure SQL<br/>Systems · Environments · Members")]
+    subgraph Azure ["Azure (Part 8)"]
       AS["App Service"] --- SQL
     end
 </pre>
@@ -265,6 +266,33 @@ flowchart LR
 
       <div class="part">
         <div class="num">7</div>
+        <h3>Members</h3>
+        <p class="goal">Keep one list of people, and pick each system's Business Owner, System Admin and IT Developer from it.</p>
+        <div class="cols">
+          <div class="box"><span class="label">Tasks</span>
+            <ul>
+              <li>Add a <code>Member</code> model: role, full name, work email, work phone, active</li>
+              <li>Members list with role filter, Add, Edit (deactivate), Delete</li>
+              <li>Member page shows their contact info and every system they're on</li>
+              <li>System form: one dropdown per role, listing only active members with that role</li>
+              <li>Block deleting a member who's assigned; block changing their role while assigned</li>
+            </ul>
+          </div>
+          <div class="box"><span class="label">Files</span>
+            <ul>
+              <li><code>Models/Member.cs</code>, <code>Models/MemberRole.cs</code></li>
+              <li><code>Data/MemberQueries.cs</code></li>
+              <li><code>Pages/Members/*</code></li>
+              <li><code>Pages/Systems/_SystemFields.cshtml</code> (dropdowns)</li>
+            </ul>
+          </div>
+        </div>
+        <div class="done"><span class="label">Done when</span><p>A new system can only pick people already added under Members, and each member's page lists their systems.</p></div>
+        <span class="doc">docs/07-members.md</span>
+      </div>
+
+      <div class="part">
+        <div class="num">8</div>
         <h3>Deploy to Azure</h3>
         <p class="goal">Put the app online for the team, backed by Azure SQL.</p>
         <div class="cols">
@@ -285,7 +313,7 @@ flowchart LR
           </div>
         </div>
         <div class="done"><span class="label">Done when</span><p>The App Service URL works and a system entered there shows up in Azure SQL.</p></div>
-        <span class="doc">docs/07-deploy-to-azure.md</span>
+        <span class="doc">docs/08-deploy-to-azure.md</span>
       </div>
 
     </div>

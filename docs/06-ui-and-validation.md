@@ -64,4 +64,4 @@ renders `<time datetime="2026-10-10T20:35:38Z" data-local="datetime">`, and a fe
 - **Validate in layers:** browser (fast feedback) → server (`ModelState`) → database (unique index). Each layer catches what the one before can miss.
 - **Store UTC, display local.** Converting times in the browser keeps them correct whatever time zone the server or the users are in.
 
-**Next:** [Part 7 — Deploy to Azure](07-deploy-to-azure.md)
+**Next:** [Part 7 — Members](07-members.md)
