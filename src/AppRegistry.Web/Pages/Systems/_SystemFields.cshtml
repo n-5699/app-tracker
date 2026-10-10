@@ -1,0 +1,32 @@
+@* Shared form fields for Create and Edit, so both forms stay identical. *@
+@model AppRegistry.Web.Models.AppSystem
+
+<div class="mb-3">
+    <label asp-for="Name" class="form-label">Name <span class="text-danger">*</span></label>
+    <input asp-for="Name" class="form-control" placeholder="e.g. Payroll Portal" />
+    <span asp-validation-for="Name" class="text-danger small"></span>
+</div>
+<div class="mb-3">
+    <label asp-for="Description" class="form-label"></label>
+    <textarea asp-for="Description" class="form-control" rows="3" placeholder="What the system does and who uses it"></textarea>
+    <span asp-validation-for="Description" class="text-danger small"></span>
+</div>
+<div class="row g-3 mb-3">
+    <div class="col-md-4">
+        <label asp-for="BusinessOwner" class="form-label">Business Owner <span class="text-danger">*</span></label>
+        <input asp-for="BusinessOwner" class="form-control" placeholder="Product owner" />
+        <div class="form-text">Who gives the requirements</div>
+        <span asp-validation-for="BusinessOwner" class="text-danger small"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="SystemAdmin" class="form-label"></label>
+        <input asp-for="SystemAdmin" class="form-control" />
+        <span asp-validation-for="SystemAdmin" class="text-danger small"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="ItDeveloper" class="form-label"></label>
+        <input asp-for="ItDeveloper" class="form-control" />
+        <div class="form-text">Who maintains it</div>
+        <span asp-validation-for="ItDeveloper" class="text-danger small"></span>
+    </div>
+</div>
