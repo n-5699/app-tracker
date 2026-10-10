@@ -67,7 +67,7 @@ else
                     @foreach (var env in group.OrderBy(e => e.Label))
                     {
                         <tr>
-                            <td><span class="badge @EnvBadge(env.Type)">@env.Type</span></td>
+                            <td><span class="badge @env.Type.BadgeClass()">@env.Type</span></td>
                             <td>@env.Label</td>
                             <td class="text-break"><a href="@env.Url" target="_blank" rel="noopener">@env.Url</a></td>
                             <td>@env.DeploymentLocation</td>
@@ -84,17 +84,6 @@ else
     </div>
 }
 
-@functions {
-    // Badge color per environment type, so Production stands out.
-    static string EnvBadge(EnvironmentType type) => type switch
-    {
-        EnvironmentType.Production => "text-bg-success",
-        EnvironmentType.Staging => "text-bg-warning",
-        EnvironmentType.UAT => "text-bg-info",
-        EnvironmentType.Test => "text-bg-primary",
-        _ => "text-bg-secondary"
-    };
-}
 
 <p class="text-muted small mt-4">
     Created @s.CreatedAt.ToLocalTime().ToString("MMM d, yyyy h:mm tt") ·
