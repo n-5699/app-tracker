@@ -11,7 +11,7 @@
 
 @if (Model.Systems.Count == 0)
 {
-    <div class="alert alert-light border text-center py-5">
+    <div class="alert bg-body-tertiary border text-center py-5">
         <p class="mb-2">No systems yet.</p>
         <a asp-page="Create" class="btn btn-outline-primary btn-sm">Add the first system</a>
     </div>
@@ -20,7 +20,7 @@ else
 {
     <div class="table-responsive">
         <table class="table table-hover align-middle">
-            <thead class="table-light">
+            <thead>
                 <tr>
                     <th>Name</th>
                     <th>Business Owner</th>
