@@ -10,6 +10,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 {
     public DbSet<AppSystem> Systems => Set<AppSystem>();
     public DbSet<AppEnvironment> Environments => Set<AppEnvironment>();
+    public DbSet<Member> Members => Set<Member>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -31,9 +32,16 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             // Store the type as readable text ("Production") instead of a number (4).
             e.Property(env => env.Type).HasConversion<string>().HasMaxLength(20);
         });
+
+        modelBuilder.Entity<Member>(e =>
+        {
+            e.ToTable("Members");
+            e.HasIndex(m => m.WorkEmail).IsUnique();   // one member per work email
+            e.Property(m => m.Role).HasConversion<string>().HasMaxLength(20);
+        });
     }
 
-    /// <summary>Sets CreatedAt / UpdatedAt automatically whenever a system (or one of its environments) is saved.</summary>
+    /// <summary>Sets CreatedAt / UpdatedAt automatically whenever a system, member, or environment is saved.</summary>
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         var now = DateTime.UtcNow;
@@ -52,7 +60,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 system.UpdatedAt = now;
         }
 
-        foreach (var entry in ChangeTracker.Entries<AppSystem>())
+        foreach (var entry in ChangeTracker.Entries<ITimestamped>())
         {
             if (entry.State == EntityState.Added)
             {

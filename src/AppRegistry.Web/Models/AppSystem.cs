@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 namespace AppRegistry.Web.Models;
 
 /// <summary>An application/system maintained by the agency.</summary>
-public class AppSystem
+public class AppSystem : ITimestamped
 {
     public int Id { get; set; }
 
