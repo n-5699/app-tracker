@@ -24,4 +24,7 @@ public class StatusCodeModel : PageModel
     };
 
     public void OnGet(int code) => Code = code;
+
+    // When a form post fails (e.g. expired form → 400), the error page is re-run as a POST too.
+    public void OnPost(int code) => Code = code;
 }
