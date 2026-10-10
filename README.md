@@ -274,7 +274,7 @@ flowchart TD
 | # | Component | Instruction file | Status |
 |---|---|---|---|
 | 1 | Project setup | [`docs/01-project-setup.md`](docs/01-project-setup.md) | ✅ |
-| 2 | Data model & database | [`docs/02-data-model-and-database.md`](docs/02-data-model-and-database.md) | ☐ |
+| 2 | Data model & database | [`docs/02-data-model-and-database.md`](docs/02-data-model-and-database.md) | ✅ |
 | 3 | Systems pages | [`docs/03-systems-pages.md`](docs/03-systems-pages.md) | ☐ |
 | 4 | Environments pages | [`docs/04-environments-pages.md`](docs/04-environments-pages.md) | ☐ |
 | 5 | List, search & filter | [`docs/05-list-and-search.md`](docs/05-list-and-search.md) | ☐ |
