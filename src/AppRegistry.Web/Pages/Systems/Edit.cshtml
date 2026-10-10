@@ -1,0 +1,19 @@
+@page "{id:int}"
+@model AppRegistry.Web.Pages.Systems.EditModel
+@{
+    ViewData["Title"] = $"Edit {Model.AppSystem.Name}";
+}
+
+<nav class="small mb-2"><a asp-page="Details" asp-route-id="@Model.AppSystem.Id">← Back to system</a></nav>
+<h1 class="h3 mb-3">Edit System</h1>
+
+<form method="post" class="col-lg-9">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <partial name="_SystemFields" for="AppSystem" />
+    <button type="submit" class="btn btn-primary">Save Changes</button>
+    <a asp-page="Details" asp-route-id="@Model.AppSystem.Id" class="btn btn-link">Cancel</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
