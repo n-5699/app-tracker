@@ -1,0 +1,10 @@
+@* A member's name linking to their page, flagged if inactive. Shows nothing for an empty role. *@
+@model AppRegistry.Web.Models.Member?
+@if (Model is not null)
+{
+    <a asp-page="/Members/Details" asp-route-id="@Model.Id">@Model.FullName</a>
+    @if (!Model.IsActive)
+    {
+        <span class="badge text-bg-secondary ms-1">Inactive</span>
+    }
+}

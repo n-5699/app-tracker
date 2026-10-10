@@ -1,0 +1,26 @@
+@* Shared form fields for adding and editing a member. *@
+@model AppRegistry.Web.Models.Member
+
+<div class="mb-3">
+    <label asp-for="Role" class="form-label">Role <span class="text-danger">*</span></label>
+    <select asp-for="Role" asp-items="Html.GetEnumSelectList<MemberRole>()" class="form-select"></select>
+    <div class="form-text">Members appear in the matching dropdown when creating or editing a system.</div>
+    <span asp-validation-for="Role" class="text-danger small"></span>
+</div>
+<div class="mb-3">
+    <label asp-for="FullName" class="form-label">Full Name <span class="text-danger">*</span></label>
+    <input asp-for="FullName" class="form-control" placeholder="e.g. Jane Smith" autocomplete="off" />
+    <span asp-validation-for="FullName" class="text-danger small"></span>
+</div>
+<div class="row g-3 mb-3">
+    <div class="col-md-7">
+        <label asp-for="WorkEmail" class="form-label">Work Email <span class="text-danger">*</span></label>
+        <input asp-for="WorkEmail" class="form-control" placeholder="name@agency.gov" autocomplete="off" />
+        <span asp-validation-for="WorkEmail" class="text-danger small"></span>
+    </div>
+    <div class="col-md-5">
+        <label asp-for="WorkPhone" class="form-label">Work Phone <span class="text-danger">*</span></label>
+        <input asp-for="WorkPhone" class="form-control" placeholder="(860) 555-0123" autocomplete="off" />
+        <span asp-validation-for="WorkPhone" class="text-danger small"></span>
+    </div>
+</div>

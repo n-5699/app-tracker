@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppRegistry.Web.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20261010200010_InitialCreate")]
+    [Migration("20261010212927_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -74,10 +74,8 @@ namespace AppRegistry.Web.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("BusinessOwner")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                    b.Property<int>("BusinessOwnerId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -86,28 +84,77 @@ namespace AppRegistry.Web.Migrations
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
 
-                    b.Property<string>("ItDeveloper")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                    b.Property<int?>("ItDeveloperId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
-                    b.Property<string>("SystemAdmin")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                    b.Property<int?>("SystemAdminId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("BusinessOwnerId");
+
+                    b.HasIndex("ItDeveloperId");
+
                     b.HasIndex("Name")
                         .IsUnique();
 
+                    b.HasIndex("SystemAdminId");
+
                     b.ToTable("Systems", (string)null);
+                });
+
+            modelBuilder.Entity("AppRegistry.Web.Models.Member", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("WorkEmail")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("WorkPhone")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("WorkEmail")
+                        .IsUnique();
+
+                    b.ToTable("Members", (string)null);
                 });
 
             modelBuilder.Entity("AppRegistry.Web.Models.AppEnvironment", b =>
@@ -119,6 +166,31 @@ namespace AppRegistry.Web.Migrations
                         .IsRequired();
 
                     b.Navigation("AppSystem");
+                });
+
+            modelBuilder.Entity("AppRegistry.Web.Models.AppSystem", b =>
+                {
+                    b.HasOne("AppRegistry.Web.Models.Member", "BusinessOwner")
+                        .WithMany()
+                        .HasForeignKey("BusinessOwnerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("AppRegistry.Web.Models.Member", "ItDeveloper")
+                        .WithMany()
+                        .HasForeignKey("ItDeveloperId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("AppRegistry.Web.Models.Member", "SystemAdmin")
+                        .WithMany()
+                        .HasForeignKey("SystemAdminId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("BusinessOwner");
+
+                    b.Navigation("ItDeveloper");
+
+                    b.Navigation("SystemAdmin");
                 });
 
             modelBuilder.Entity("AppRegistry.Web.Models.AppSystem", b =>

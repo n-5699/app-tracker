@@ -15,6 +15,9 @@ public class DetailsModel(AppDbContext db) : PageModel
     {
         var system = await db.Systems
             .Include(s => s.Environments)
+            .Include(s => s.BusinessOwner)
+            .Include(s => s.SystemAdmin)
+            .Include(s => s.ItDeveloper)
             .AsNoTracking()
             .FirstOrDefaultAsync(s => s.Id == id);
 

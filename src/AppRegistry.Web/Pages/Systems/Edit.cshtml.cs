@@ -19,6 +19,7 @@ public class EditModel(AppDbContext db) : PageModel
             return NotFound();
 
         AppSystem = system;
+        await LoadMemberOptionsAsync();
         return Page();
     }
 
@@ -34,15 +35,20 @@ public class EditModel(AppDbContext db) : PageModel
         if (await db.Systems.NameExistsAsync(AppSystem.Name, exceptId: id))
             ModelState.AddModelError("AppSystem.Name", "A system with this name already exists.");
 
+        await db.ValidateAssignmentsAsync(AppSystem, ModelState, existing);
+
         if (!ModelState.IsValid)
+        {
+            await LoadMemberOptionsAsync();
             return Page();
+        }
 
         // Copy only the editable fields onto the saved record (Id and CreatedAt stay as they were).
         existing.Name = AppSystem.Name;
         existing.Description = AppSystem.Description;
-        existing.BusinessOwner = AppSystem.BusinessOwner;
-        existing.SystemAdmin = AppSystem.SystemAdmin;
-        existing.ItDeveloper = AppSystem.ItDeveloper;
+        existing.BusinessOwnerId = AppSystem.BusinessOwnerId;
+        existing.SystemAdminId = AppSystem.SystemAdminId;
+        existing.ItDeveloperId = AppSystem.ItDeveloperId;
 
         try
         {
@@ -51,9 +57,18 @@ public class EditModel(AppDbContext db) : PageModel
         catch (DbUpdateException)
         {
             ModelState.AddModelError("AppSystem.Name", "A system with this name already exists.");
+            await LoadMemberOptionsAsync();
             return Page();
         }
         TempData["Success"] = "Changes saved.";
         return RedirectToPage("Details", new { id });
+    }
+
+    /// <summary>Fills the three people dropdowns with members of the matching role.</summary>
+    private async Task LoadMemberOptionsAsync()
+    {
+        ViewData["BusinessOwnerIdOptions"] = await db.MemberOptionsAsync(MemberRole.BusinessOwner, AppSystem.BusinessOwnerId);
+        ViewData["SystemAdminIdOptions"] = await db.MemberOptionsAsync(MemberRole.SystemAdmin, AppSystem.SystemAdminId);
+        ViewData["ItDeveloperIdOptions"] = await db.MemberOptionsAsync(MemberRole.ItDeveloper, AppSystem.ItDeveloperId);
     }
 }

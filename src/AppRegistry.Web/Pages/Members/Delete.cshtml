@@ -1,0 +1,32 @@
+@page "{id:int}"
+@model AppRegistry.Web.Pages.Members.DeleteModel
+@{
+    var m = Model.Member;
+    ViewData["Title"] = $"Delete {m.FullName}";
+}
+
+<nav class="small mb-2"><a asp-page="Details" asp-route-id="@m.Id">← Back to member</a></nav>
+<h1 class="h3 mb-3">Delete Member</h1>
+
+@if (Model.AssignedCount > 0)
+{
+    <div class="alert alert-warning col-lg-8">
+        <p class="mb-1"><strong>@m.FullName</strong> can't be deleted. They're assigned to @Model.AssignedCount system(s).</p>
+        <p class="mb-0 small">
+            Assign someone else on those systems first, or <a asp-page="Edit" asp-route-id="@m.Id">deactivate</a>
+            them so they can't be picked for new systems.
+        </p>
+    </div>
+    <a asp-page="Details" asp-route-id="@m.Id" class="btn btn-outline-secondary">Back to member</a>
+}
+else
+{
+    <div class="alert alert-danger col-lg-8">
+        <p class="mb-1">Delete <strong>@m.FullName</strong> (@m.Role.DisplayName(), @m.WorkEmail)?</p>
+        <p class="mb-0 small">This cannot be undone.</p>
+    </div>
+    <form method="post">
+        <button type="submit" class="btn btn-danger">Delete Member</button>
+        <a asp-page="Details" asp-route-id="@m.Id" class="btn btn-link">Cancel</a>
+    </form>
+}

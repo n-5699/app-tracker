@@ -1,0 +1,76 @@
+@page "{id:int}"
+@model AppRegistry.Web.Pages.Members.DetailsModel
+@{
+    var m = Model.Member;
+    ViewData["Title"] = m.FullName;
+}
+
+<nav class="small mb-2"><a asp-page="Index">← Members</a></nav>
+
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+    <div>
+        <h1 class="h3 mb-1">
+            @m.FullName
+            @if (!m.IsActive)
+            {
+                <span class="badge text-bg-secondary align-middle fs-6">Inactive</span>
+            }
+        </h1>
+        <span class="badge @m.Role.BadgeClass()">@m.Role.DisplayName()</span>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-page="Edit" asp-route-id="@m.Id" class="btn btn-outline-secondary">Edit</a>
+        <a asp-page="Delete" asp-route-id="@m.Id" class="btn btn-outline-danger">Delete</a>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="border rounded p-3 h-100">
+            <div class="text-body-secondary small text-uppercase">Work Email</div>
+            <div class="fw-semibold text-break"><a href="mailto:@m.WorkEmail">@m.WorkEmail</a></div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="border rounded p-3 h-100">
+            <div class="text-body-secondary small text-uppercase">Work Phone</div>
+            <div class="fw-semibold">@m.WorkPhone</div>
+        </div>
+    </div>
+</div>
+
+<h2 class="h5">Systems <span class="text-body-secondary fw-normal">(@Model.Systems.Count)</span></h2>
+@if (Model.Systems.Count == 0)
+{
+    <p class="text-body-secondary">@m.FullName isn't assigned to any systems yet.</p>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr><th>System</th><th>Role on this system</th><th>Environments</th><th>Last Updated</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var s in Model.Systems)
+                {
+                    <tr>
+                        <td><a asp-page="/Systems/Details" asp-route-id="@s.Id" class="fw-semibold">@s.Name</a></td>
+                        <td>@m.Role.DisplayName()</td>
+                        <td>
+                            @foreach (var g in s.Environments.GroupBy(e => e.Type).OrderByDescending(g => g.Key))
+                            {
+                                <span class="badge @g.Key.BadgeClass() me-1">@g.Key@(g.Count() > 1 ? $" ×{g.Count()}" : "")</span>
+                            }
+                            @if (s.Environments.Count == 0)
+                            {
+                                <span class="text-body-secondary small">None yet</span>
+                            }
+                        </td>
+                        <td class="text-body-secondary small text-nowrap">@Html.LocalTime(s.UpdatedAt)</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

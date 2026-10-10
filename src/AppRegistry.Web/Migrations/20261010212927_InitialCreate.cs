@@ -12,6 +12,25 @@ namespace AppRegistry.Web.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "Members",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Role = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    FullName = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    WorkEmail = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
+                    WorkPhone = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Members", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Systems",
                 columns: table => new
                 {
@@ -19,15 +38,33 @@ namespace AppRegistry.Web.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
                     Description = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: true),
-                    BusinessOwner = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    SystemAdmin = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
-                    ItDeveloper = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
+                    BusinessOwnerId = table.Column<int>(type: "int", nullable: false),
+                    SystemAdminId = table.Column<int>(type: "int", nullable: true),
+                    ItDeveloperId = table.Column<int>(type: "int", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Systems", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Systems_Members_BusinessOwnerId",
+                        column: x => x.BusinessOwnerId,
+                        principalTable: "Members",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Systems_Members_ItDeveloperId",
+                        column: x => x.ItDeveloperId,
+                        principalTable: "Members",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Systems_Members_SystemAdminId",
+                        column: x => x.SystemAdminId,
+                        principalTable: "Members",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -60,10 +97,31 @@ namespace AppRegistry.Web.Migrations
                 column: "AppSystemId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Members_WorkEmail",
+                table: "Members",
+                column: "WorkEmail",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Systems_BusinessOwnerId",
+                table: "Systems",
+                column: "BusinessOwnerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Systems_ItDeveloperId",
+                table: "Systems",
+                column: "ItDeveloperId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Systems_Name",
                 table: "Systems",
                 column: "Name",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Systems_SystemAdminId",
+                table: "Systems",
+                column: "SystemAdminId");
         }
 
         /// <inheritdoc />
@@ -74,6 +132,9 @@ namespace AppRegistry.Web.Migrations
 
             migrationBuilder.DropTable(
                 name: "Systems");
+
+            migrationBuilder.DropTable(
+                name: "Members");
         }
     }
 }

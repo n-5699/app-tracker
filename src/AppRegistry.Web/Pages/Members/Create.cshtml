@@ -1,0 +1,19 @@
+@page
+@model AppRegistry.Web.Pages.Members.CreateModel
+@{
+    ViewData["Title"] = "Add Member";
+}
+
+<nav class="small mb-2"><a asp-page="Index">← Members</a></nav>
+<h1 class="h3 mb-3">Add Member</h1>
+
+<form method="post" class="col-lg-7">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <partial name="_MemberFields" for="Member" />
+    <button type="submit" class="btn btn-primary">Add Member</button>
+    <a asp-page="Index" class="btn btn-link">Cancel</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -22,24 +22,24 @@
 </div>
 
 <div class="row g-3 mb-4">
-    <div class="col-md-4">
-        <div class="border rounded p-3 h-100">
-            <div class="text-muted small text-uppercase">Business Owner</div>
-            <div class="fw-semibold">@s.BusinessOwner</div>
+    @foreach (var (label, person) in new[] { ("Business Owner", s.BusinessOwner), ("System Admin", s.SystemAdmin), ("IT Developer", s.ItDeveloper) })
+    {
+        <div class="col-md-4">
+            <div class="border rounded p-3 h-100">
+                <div class="text-body-secondary small text-uppercase">@label</div>
+                @if (person is null)
+                {
+                    <div class="text-body-secondary">—</div>
+                }
+                else
+                {
+                    <div class="fw-semibold"><partial name="_MemberLink" model="person" /></div>
+                    <div class="small text-break"><a href="mailto:@person.WorkEmail">@person.WorkEmail</a></div>
+                    <div class="small text-body-secondary">@person.WorkPhone</div>
+                }
+            </div>
         </div>
-    </div>
-    <div class="col-md-4">
-        <div class="border rounded p-3 h-100">
-            <div class="text-muted small text-uppercase">System Admin</div>
-            <div class="fw-semibold">@(s.SystemAdmin ?? "—")</div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="border rounded p-3 h-100">
-            <div class="text-muted small text-uppercase">IT Developer</div>
-            <div class="fw-semibold">@(s.ItDeveloper ?? "—")</div>
-        </div>
-    </div>
+    }
 </div>
 
 <div class="d-flex justify-content-between align-items-center mb-2">

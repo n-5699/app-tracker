@@ -28,7 +28,11 @@ public class IndexModel(AppDbContext db) : PageModel
     {
         TotalCount = await db.Systems.CountAsync();
 
-        IQueryable<AppSystem> query = db.Systems.Include(s => s.Environments);
+        IQueryable<AppSystem> query = db.Systems
+            .Include(s => s.Environments)
+            .Include(s => s.BusinessOwner)
+            .Include(s => s.SystemAdmin)
+            .Include(s => s.ItDeveloper);
 
         if (!string.IsNullOrWhiteSpace(Q))
         {
@@ -40,9 +44,10 @@ public class IndexModel(AppDbContext db) : PageModel
             query = query.Where(s =>
                 EF.Functions.Like(s.Name, pattern, @"\") ||
                 EF.Functions.Like(s.Description ?? "", pattern, @"\") ||
-                EF.Functions.Like(s.BusinessOwner, pattern, @"\") ||
-                EF.Functions.Like(s.SystemAdmin ?? "", pattern, @"\") ||
-                EF.Functions.Like(s.ItDeveloper ?? "", pattern, @"\") ||
+                // the assigned people's names and emails
+                (s.BusinessOwner != null && (EF.Functions.Like(s.BusinessOwner.FullName, pattern, @"\") || EF.Functions.Like(s.BusinessOwner.WorkEmail, pattern, @"\"))) ||
+                (s.SystemAdmin != null && (EF.Functions.Like(s.SystemAdmin.FullName, pattern, @"\") || EF.Functions.Like(s.SystemAdmin.WorkEmail, pattern, @"\"))) ||
+                (s.ItDeveloper != null && (EF.Functions.Like(s.ItDeveloper.FullName, pattern, @"\") || EF.Functions.Like(s.ItDeveloper.WorkEmail, pattern, @"\"))) ||
                 // also find systems by an environment's URL or location, e.g. a server name
                 s.Environments.Any(e =>
                     EF.Functions.Like(e.Url, pattern, @"\") ||

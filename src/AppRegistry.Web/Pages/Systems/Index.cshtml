@@ -23,7 +23,7 @@ else
         <div class="col-md-6">
             <label for="q" class="form-label small text-body-secondary mb-1">Search</label>
             <input id="q" name="q" value="@Model.Q" class="form-control" type="search"
-                   placeholder="System, person, URL or server name" />
+                   placeholder="System, person, email, URL or server name" />
         </div>
         <div class="col-md-3">
             <label for="type" class="form-label small text-body-secondary mb-1">Has environment</label>
@@ -69,9 +69,9 @@ else
                     {
                         <tr>
                             <td><a asp-page="Details" asp-route-id="@s.Id" class="fw-semibold">@s.Name</a></td>
-                            <td>@s.BusinessOwner</td>
-                            <td>@s.SystemAdmin</td>
-                            <td>@s.ItDeveloper</td>
+                            <td><partial name="_MemberLink" model="s.BusinessOwner" /></td>
+                            <td><partial name="_MemberLink" model="s.SystemAdmin" /></td>
+                            <td><partial name="_MemberLink" model="s.ItDeveloper" /></td>
                             <td>
                                 @* One badge per environment type, with a count when there's more than one. Production first. *@
                                 @foreach (var g in s.Environments.GroupBy(e => e.Type).OrderByDescending(g => g.Key))

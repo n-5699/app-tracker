@@ -1,0 +1,74 @@
+@page
+@model AppRegistry.Web.Pages.Members.IndexModel
+@{
+    ViewData["Title"] = "Members";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Members</h1>
+    <a asp-page="Create" class="btn btn-primary">+ Add Member</a>
+</div>
+
+@if (Model.TotalCount == 0)
+{
+    <div class="alert bg-body-tertiary border text-center py-5">
+        <p class="mb-1">No members yet.</p>
+        <p class="small text-body-secondary mb-3">Add the business owners, system admins and IT developers who can be assigned to systems.</p>
+        <a asp-page="Create" class="btn btn-outline-primary btn-sm">Add the first member</a>
+    </div>
+}
+else
+{
+    <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+        @* Role filter tabs *@
+        <div class="btn-group btn-group-sm" role="group" aria-label="Filter by role">
+            <a asp-page="Index" asp-route-inactive="@(Model.Inactive ? "true" : null)"
+               class="btn @(Model.Role is null ? "btn-secondary" : "btn-outline-secondary")">All roles</a>
+            @foreach (var r in Enum.GetValues<MemberRole>())
+            {
+                <a asp-page="Index" asp-route-role="@r" asp-route-inactive="@(Model.Inactive ? "true" : null)"
+                   class="btn @(Model.Role == r ? "btn-secondary" : "btn-outline-secondary")">@r.DisplayName()</a>
+            }
+        </div>
+        @if (Model.InactiveCount > 0)
+        {
+            <a asp-page="Index" asp-route-role="@Model.Role" asp-route-inactive="@(Model.Inactive ? null : "true")" class="small ms-auto">
+                @(Model.Inactive ? "Hide inactive members" : $"Show inactive members ({Model.InactiveCount})")
+            </a>
+        }
+    </div>
+
+    @if (Model.Members.Count == 0)
+    {
+        <div class="alert bg-body-tertiary border text-center py-4">No members match this filter.</div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr><th>Name</th><th>Role</th><th>Work Email</th><th>Work Phone</th><th class="text-end">Systems</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var m in Model.Members)
+                    {
+                        <tr class="@(m.IsActive ? "" : "opacity-50")">
+                            <td>
+                                <a asp-page="Details" asp-route-id="@m.Id" class="fw-semibold">@m.FullName</a>
+                                @if (!m.IsActive)
+                                {
+                                    <span class="badge text-bg-secondary ms-1">Inactive</span>
+                                }
+                            </td>
+                            <td><span class="badge @m.Role.BadgeClass()">@m.Role.DisplayName()</span></td>
+                            <td class="text-break"><a href="mailto:@m.WorkEmail">@m.WorkEmail</a></td>
+                            <td class="text-nowrap">@m.WorkPhone</td>
+                            <td class="text-end">@Model.SystemCounts.GetValueOrDefault(m.Id)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    <p class="text-body-secondary small">@Model.Members.Count member(s) shown</p>
+}

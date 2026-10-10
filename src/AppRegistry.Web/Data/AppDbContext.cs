@@ -24,6 +24,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
              .WithOne(env => env.AppSystem)
              .HasForeignKey(env => env.AppSystemId)
              .OnDelete(DeleteBehavior.Cascade);
+
+            // Each person on a system is a Member. Restrict = a member can't be deleted while assigned.
+            e.HasOne(s => s.BusinessOwner).WithMany().HasForeignKey(s => s.BusinessOwnerId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(s => s.SystemAdmin).WithMany().HasForeignKey(s => s.SystemAdminId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(s => s.ItDeveloper).WithMany().HasForeignKey(s => s.ItDeveloperId).OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<AppEnvironment>(e =>
