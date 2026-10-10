@@ -31,7 +31,7 @@ public class EditModel(AppDbContext db) : PageModel
             return NotFound();
 
         AppSystem.Name = AppSystem.Name.Trim();
-        if (await db.Systems.AnyAsync(s => s.Name == AppSystem.Name && s.Id != id))
+        if (await db.Systems.NameExistsAsync(AppSystem.Name, exceptId: id))
             ModelState.AddModelError("AppSystem.Name", "A system with this name already exists.");
 
         if (!ModelState.IsValid)
@@ -44,7 +44,15 @@ public class EditModel(AppDbContext db) : PageModel
         existing.SystemAdmin = AppSystem.SystemAdmin;
         existing.ItDeveloper = AppSystem.ItDeveloper;
 
-        await db.SaveChangesAsync();   // UpdatedAt is set automatically in AppDbContext
+        try
+        {
+            await db.SaveChangesAsync();   // UpdatedAt is set automatically in AppDbContext
+        }
+        catch (DbUpdateException)
+        {
+            ModelState.AddModelError("AppSystem.Name", "A system with this name already exists.");
+            return Page();
+        }
         TempData["Success"] = "Changes saved.";
         return RedirectToPage("Details", new { id });
     }

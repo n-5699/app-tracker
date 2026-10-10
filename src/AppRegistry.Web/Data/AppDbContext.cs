@@ -37,6 +37,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         var now = DateTime.UtcNow;
+        TrimText();
 
         // Adding, editing or deleting an environment counts as an update to its system.
         var touchedSystemIds = ChangeTracker.Entries<AppEnvironment>()
@@ -64,5 +65,40 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             }
         }
         return await base.SaveChangesAsync(cancellationToken);
+    }
+
+    /// <summary>
+    /// Removes stray spaces from every text field being saved, and stores blank optional fields as NULL,
+    /// so "Jane Smith " and "Jane Smith" are the same person.
+    /// </summary>
+    private void TrimText()
+    {
+        var changed = ChangeTracker.Entries()
+            .Where(e => e.State is EntityState.Added or EntityState.Modified);
+
+        foreach (var entry in changed)
+        {
+            foreach (var prop in entry.Properties.Where(p => p.Metadata.ClrType == typeof(string)))
+            {
+                if (prop.CurrentValue is not string value)
+                    continue;
+
+                var trimmed = value.Trim();
+                prop.CurrentValue = trimmed.Length == 0 && prop.Metadata.IsNullable ? null : trimmed;
+            }
+        }
+    }
+}
+
+public static class AppSystemQueries
+{
+    /// <summary>
+    /// True if another system already uses this name, ignoring upper/lower case
+    /// (SQLite compares case-sensitively by default, Azure SQL does not, so make it explicit).
+    /// </summary>
+    public static Task<bool> NameExistsAsync(this IQueryable<AppSystem> systems, string name, int? exceptId = null)
+    {
+        var lower = name.Trim().ToLower();
+        return systems.AnyAsync(s => s.Name.ToLower() == lower && s.Id != exceptId);
     }
 }
