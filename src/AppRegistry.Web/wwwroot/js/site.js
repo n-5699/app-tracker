@@ -3,6 +3,18 @@
 
 // Write your JavaScript code.
 
+// Show <time data-local> elements (rendered by Html.LocalTime) in the viewer's own time zone.
+document.querySelectorAll('time[data-local]').forEach(function (el) {
+    const date = new Date(el.getAttribute('datetime'));
+    if (isNaN(date)) return;
+    const options = { month: 'short', day: 'numeric', year: 'numeric' };
+    if (el.dataset.local === 'datetime') {
+        options.hour = 'numeric';
+        options.minute = '2-digit';
+    }
+    el.textContent = date.toLocaleString(undefined, options);
+});
+
 // Dark / light mode toggle (button in the top nav bar). The choice is remembered in this browser.
 (function () {
     const root = document.documentElement;

@@ -86,6 +86,6 @@ else
 
 
 <p class="text-muted small mt-4">
-    Created @s.CreatedAt.ToLocalTime().ToString("MMM d, yyyy h:mm tt") ·
-    Last updated @s.UpdatedAt.ToLocalTime().ToString("MMM d, yyyy h:mm tt")
+    Created @Html.LocalTime(s.CreatedAt, includeTime: true) ·
+    Last updated @Html.LocalTime(s.UpdatedAt, includeTime: true)
 </p>

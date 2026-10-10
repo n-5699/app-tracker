@@ -83,7 +83,7 @@ else
                                     <span class="text-body-secondary small">None yet</span>
                                 }
                             </td>
-                            <td class="text-body-secondary small text-nowrap">@s.UpdatedAt.ToLocalTime().ToString("MMM d, yyyy")</td>
+                            <td class="text-body-secondary small text-nowrap">@Html.LocalTime(s.UpdatedAt)</td>
                         </tr>
                     }
                 </tbody>
