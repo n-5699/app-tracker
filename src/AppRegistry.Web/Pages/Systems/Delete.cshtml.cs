@@ -32,6 +32,7 @@ public class DeleteModel(AppDbContext db) : PageModel
         {
             db.Systems.Remove(system);
             await db.SaveChangesAsync();
+            TempData["Success"] = $"System \"{system.Name}\" deleted.";
         }
         return RedirectToPage("Index");
     }

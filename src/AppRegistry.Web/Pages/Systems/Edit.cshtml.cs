@@ -45,6 +45,7 @@ public class EditModel(AppDbContext db) : PageModel
         existing.ItDeveloper = AppSystem.ItDeveloper;
 
         await db.SaveChangesAsync();   // UpdatedAt is set automatically in AppDbContext
+        TempData["Success"] = "Changes saved.";
         return RedirectToPage("Details", new { id });
     }
 }

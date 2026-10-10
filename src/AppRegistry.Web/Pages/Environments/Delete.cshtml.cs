@@ -30,6 +30,7 @@ public class DeleteModel(AppDbContext db) : PageModel
         var systemId = env.AppSystemId;
         db.Environments.Remove(env);
         await db.SaveChangesAsync();
+        TempData["Success"] = $"{env.Type} environment deleted.";
         return RedirectToPage("/Systems/Details", new { id = systemId });
     }
 }

@@ -40,6 +40,7 @@ public class CreateModel(AppDbContext db) : PageModel
         AppEnvironment.AppSystemId = systemId;
         db.Environments.Add(AppEnvironment);
         await db.SaveChangesAsync();
+        TempData["Success"] = $"{AppEnvironment.Type} environment added.";
         return RedirectToPage("/Systems/Details", new { id = systemId });
     }
 }

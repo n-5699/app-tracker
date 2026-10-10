@@ -50,6 +50,14 @@
     </header>
     <div class="container">
         <main role="main" class="pb-3">
+            @* One-time confirmation set by a page after saving (TempData lasts for exactly one redirect). *@
+            @if (TempData["Success"] is string success)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="status">
+                    @success
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
             @RenderBody()
         </main>
     </div>

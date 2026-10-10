@@ -45,6 +45,7 @@ public class EditModel(AppDbContext db) : PageModel
         existing.Notes = AppEnvironment.Notes;
 
         await db.SaveChangesAsync();
+        TempData["Success"] = $"{existing.Type} environment updated.";
         return RedirectToPage("/Systems/Details", new { id = existing.AppSystemId });
     }
 }

@@ -29,6 +29,7 @@ public class CreateModel(AppDbContext db) : PageModel
 
         db.Systems.Add(AppSystem);
         await db.SaveChangesAsync();
+        TempData["Success"] = $"System \"{AppSystem.Name}\" created.";
         return RedirectToPage("Details", new { id = AppSystem.Id });
     }
 }
