@@ -33,10 +33,24 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         });
     }
 
-    /// <summary>Sets CreatedAt / UpdatedAt automatically whenever a system is saved.</summary>
-    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    /// <summary>Sets CreatedAt / UpdatedAt automatically whenever a system (or one of its environments) is saved.</summary>
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         var now = DateTime.UtcNow;
+
+        // Adding, editing or deleting an environment counts as an update to its system.
+        var touchedSystemIds = ChangeTracker.Entries<AppEnvironment>()
+            .Where(e => e.State is EntityState.Added or EntityState.Modified or EntityState.Deleted)
+            .Select(e => e.Entity.AppSystemId)
+            .Distinct()
+            .ToList();
+        foreach (var systemId in touchedSystemIds)
+        {
+            var system = await Systems.FindAsync([systemId], cancellationToken);
+            if (system is not null && Entry(system).State == EntityState.Unchanged)
+                system.UpdatedAt = now;
+        }
+
         foreach (var entry in ChangeTracker.Entries<AppSystem>())
         {
             if (entry.State == EntityState.Added)
@@ -49,6 +63,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 entry.Entity.UpdatedAt = now;
             }
         }
-        return base.SaveChangesAsync(cancellationToken);
+        return await base.SaveChangesAsync(cancellationToken);
     }
 }

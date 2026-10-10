@@ -42,32 +42,58 @@
     </div>
 </div>
 
-<h2 class="h5">Environments</h2>
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <h2 class="h5 mb-0">Environments <span class="text-body-secondary fw-normal">(@s.Environments.Count)</span></h2>
+    <a asp-page="/Environments/Create" asp-route-systemId="@s.Id" class="btn btn-primary btn-sm">+ Add Environment</a>
+</div>
 @if (s.Environments.Count == 0)
 {
-    <p class="text-muted">No environments recorded yet.</p>
+    <div class="alert bg-body-tertiary border text-center py-4">
+        <p class="mb-2">No environments recorded yet.</p>
+        <a asp-page="/Environments/Create" asp-route-systemId="@s.Id" class="btn btn-outline-primary btn-sm">Add the first environment</a>
+    </div>
 }
 else
 {
     <div class="table-responsive">
         <table class="table align-middle">
             <thead>
-                <tr><th>Type</th><th>Label</th><th>URL</th><th>Deployment Location</th><th>Notes</th></tr>
+                <tr><th>Type</th><th>Label</th><th>URL</th><th>Deployment Location</th><th>Notes</th><th></th></tr>
             </thead>
-            <tbody>
-                @foreach (var env in s.Environments.OrderBy(e => e.Type).ThenBy(e => e.Label))
-                {
-                    <tr>
-                        <td><span class="badge text-bg-secondary">@env.Type</span></td>
-                        <td>@env.Label</td>
-                        <td><a href="@env.Url" target="_blank" rel="noopener">@env.Url</a></td>
-                        <td>@env.DeploymentLocation</td>
-                        <td class="small text-muted">@env.Notes</td>
-                    </tr>
-                }
-            </tbody>
+            @* One group per environment type, Production first. *@
+            @foreach (var group in s.Environments.GroupBy(e => e.Type).OrderByDescending(g => g.Key))
+            {
+                <tbody>
+                    @foreach (var env in group.OrderBy(e => e.Label))
+                    {
+                        <tr>
+                            <td><span class="badge @EnvBadge(env.Type)">@env.Type</span></td>
+                            <td>@env.Label</td>
+                            <td class="text-break"><a href="@env.Url" target="_blank" rel="noopener">@env.Url</a></td>
+                            <td>@env.DeploymentLocation</td>
+                            <td class="small text-body-secondary">@env.Notes</td>
+                            <td class="text-end text-nowrap">
+                                <a asp-page="/Environments/Edit" asp-route-id="@env.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
+                                <a asp-page="/Environments/Delete" asp-route-id="@env.Id" class="btn btn-sm btn-outline-danger">Delete</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            }
         </table>
     </div>
+}
+
+@functions {
+    // Badge color per environment type, so Production stands out.
+    static string EnvBadge(EnvironmentType type) => type switch
+    {
+        EnvironmentType.Production => "text-bg-success",
+        EnvironmentType.Staging => "text-bg-warning",
+        EnvironmentType.UAT => "text-bg-info",
+        EnvironmentType.Test => "text-bg-primary",
+        _ => "text-bg-secondary"
+    };
 }
 
 <p class="text-muted small mt-4">
