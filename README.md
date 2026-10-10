@@ -278,7 +278,7 @@ flowchart TD
 | 3 | Systems pages | [`docs/03-systems-pages.md`](docs/03-systems-pages.md) | ✅ |
 | 4 | Environments pages | [`docs/04-environments-pages.md`](docs/04-environments-pages.md) | ✅ |
 | 5 | List, search & filter | [`docs/05-list-and-search.md`](docs/05-list-and-search.md) | ✅ |
-| 6 | UI polish & validation | [`docs/06-ui-and-validation.md`](docs/06-ui-and-validation.md) | ☐ |
+| 6 | UI polish & validation | [`docs/06-ui-and-validation.md`](docs/06-ui-and-validation.md) | ✅ |
 | 7 | Deploy to Azure | [`docs/07-deploy-to-azure.md`](docs/07-deploy-to-azure.md) | ☐ |
 
 ---
